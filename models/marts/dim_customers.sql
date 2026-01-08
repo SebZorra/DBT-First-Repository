@@ -3,13 +3,10 @@ with customers as (
      select * from {{ ref('stg_jaffle_shop__customers') }}
 
 ),
-
-orders as ( 
-
-    select * from {{ ref('stg_jaffle_shop_orders') }}
+orders as (
+    select * from {{ ref ('fct_orders')}}
 
 ),
-
 customer_orders as (
 
     select
@@ -18,6 +15,7 @@ customer_orders as (
         min(order_date) as first_order_date,
         max(order_date) as most_recent_order_date,
         count(order_id) as number_of_orders
+        sum(amount) as lifetime_value
 
     from orders
 
@@ -34,6 +32,7 @@ final as (
         customer_orders.first_order_date,
         customer_orders.most_recent_order_date,
         coalesce (customer_orders.number_of_orders, 0) 
+        customer_orders.lifetime_value
         as number_of_orders
 
     from customers
